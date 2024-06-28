@@ -1,6 +1,7 @@
 package main
 
 import (
+	"clientgrpc/internal/config"
 	"clientgrpc/internal/grpcclient"
 	"context"
 	"log"
@@ -10,8 +11,12 @@ import (
 )
 
 func main() {
-	// Использование новой функции для создания gRPC соединения.
-	conn, err := grpcclient.NewGRPCClientConn("localhost:50051")
+	cfg, err := config.LoadConfig("config/config.json")
+	if err != nil {
+		log.Fatalf("could not load config: %v", err)
+	}
+
+	conn, err := grpcclient.NewGRPCClientConn(cfg.ServerAddress)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
