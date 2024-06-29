@@ -1,14 +1,13 @@
 package main
 
 import (
+	"clientgrpc/internal/auth"
 	"clientgrpc/internal/config"
 	"context"
 	"log"
-	"os"
 	"time"
 
 	pb "github.com/MajotraderLucky/ServerGRPC/api/proto/pb"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -34,7 +33,7 @@ func main() {
 
 	c := pb.NewSimpleServiceClient(conn)
 
-	token, err := generateJWT()
+	token, err := auth.GenerateJWT()
 	if err != nil {
 		log.Fatalf("could not generate token: %v", err)
 	}
@@ -48,23 +47,6 @@ func main() {
 		log.Fatalf("could not greet: %v", err)
 	}
 	log.Printf("Greeting: %s", r.GetMessage())
-}
-
-func generateJWT() (string, error) {
-	jwtSecretKey := []byte(os.Getenv("JWT_SECRET_KEY"))
-
-	claims := &jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // Токен истекает через 24 часа
-		Issuer:    "exampleIssuer",
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, err := token.SignedString(jwtSecretKey)
-	if err != nil {
-		return "", err
-	}
-
-	return signedToken, nil
 }
 
 func init() {
