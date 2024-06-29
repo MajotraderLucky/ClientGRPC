@@ -19,31 +19,40 @@ func main() {
 		log.Fatalf("could not load config: %v", err)
 	}
 
-	creds, err := credentials.NewClientTLSFromFile(cfg.Certs, "")
+	conn, err := createGRPCConnection(cfg)
 	if err != nil {
-		log.Fatalf("could not load tls cert: %v", err)
-	}
-
-	conn, err := grpc.Dial(cfg.ServerAddress, grpc.WithTransportCredentials(creds))
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Fatalf("could not connect to server: %v", err)
 	}
 	defer conn.Close()
 
 	c := pb.NewSimpleServiceClient(conn)
 
+	response, err := makeEchoRequest(c, "Hello, server!")
+	if err != nil {
+		log.Fatalf("could not make echo request: %v", err)
+	}
+
+	log.Printf("Greeting: %s", response.GetMessage())
+}
+
+func createGRPCConnection(cfg *config.Config) (*grpc.ClientConn, error) {
+	creds, err := credentials.NewClientTLSFromFile(cfg.Certs, "")
+	if err != nil {
+		return nil, err
+	}
+
+	return grpc.Dial(cfg.ServerAddress, grpc.WithTransportCredentials(creds))
+}
+
+func makeEchoRequest(client pb.SimpleServiceClient, message string) (*pb.EchoResponse, error) {
 	token, err := auth.GenerateJWT()
 	if err != nil {
-		log.Fatalf("could not generate token: %v", err)
+		return nil, err
 	}
 
 	md := metadata.Pairs("authorization", "Bearer "+token)
 	reqCtx, reqCancel := context.WithTimeout(metadata.NewOutgoingContext(context.Background(), md), time.Second)
 	defer reqCancel()
 
-	r, err := c.Echo(reqCtx, &pb.EchoRequest{Message: "Hello, server!"})
-	if err != nil {
-		log.Fatalf("could not greet: %v", err)
-	}
-	log.Printf("Greeting: %s", r.GetMessage())
+	return client.Echo(reqCtx, &pb.EchoRequest{Message: message})
 }
