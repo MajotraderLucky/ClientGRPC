@@ -8,7 +8,6 @@ import (
 	"time"
 
 	pb "github.com/MajotraderLucky/ServerGRPC/api/proto/pb"
-	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
@@ -47,11 +46,4 @@ func main() {
 		log.Fatalf("could not greet: %v", err)
 	}
 	log.Printf("Greeting: %s", r.GetMessage())
-}
-
-func init() {
-	// Загрузка .env файла при инициализации пакета
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
-	}
 }

@@ -1,11 +1,20 @@
 package auth
 
 import (
+	"log"
 	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/joho/godotenv"
 )
+
+func init() {
+	// Загрузка .env файла при инициализации пакета
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file")
+	}
+}
 
 func GenerateJWT() (string, error) {
 	jwtSecretKey := []byte(os.Getenv("JWT_SECRET_KEY"))
