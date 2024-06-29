@@ -2,12 +2,13 @@ package main
 
 import (
 	"clientgrpc/internal/config"
-	"clientgrpc/internal/grpcclient"
 	"context"
 	"log"
 	"time"
 
 	pb "github.com/MajotraderLucky/ServerGRPC/api/proto/pb"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 func main() {
@@ -16,7 +17,14 @@ func main() {
 		log.Fatalf("could not load config: %v", err)
 	}
 
-	conn, err := grpcclient.NewGRPCClientConn(cfg.ServerAddress)
+	// Загрузка TLS учетных данных
+	creds, err := credentials.NewClientTLSFromFile(cfg.Certs, "")
+	if err != nil {
+		log.Fatalf("could not load tls cert: %v", err)
+	}
+
+	// Создание соединения с сервером
+	conn, err := grpc.Dial(cfg.ServerAddress, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}

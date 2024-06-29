@@ -8,6 +8,7 @@ import (
 type Config struct {
 	ServerAddress  string `json:"serverAddress"`
 	TimeoutSeconds int    `json:"timeoutSeconds"`
+	Certs          string `json:"certsTLS"`
 }
 
 func LoadConfig(path string) (*Config, error) {
