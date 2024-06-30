@@ -6,8 +6,6 @@ import (
 	"log"
 
 	pb "github.com/MajotraderLucky/ServerGRPC/api/proto/pb"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 func main() {
@@ -16,7 +14,7 @@ func main() {
 		log.Fatalf("could not load config: %v", err)
 	}
 
-	conn, err := createGRPCConnection(cfg)
+	conn, err := grpcclient.CreateGRPCConnection(cfg)
 	if err != nil {
 		log.Fatalf("could not connect to server: %v", err)
 	}
@@ -30,13 +28,4 @@ func main() {
 	}
 
 	log.Printf("Greeting: %s", response.GetMessage())
-}
-
-func createGRPCConnection(cfg *config.Config) (*grpc.ClientConn, error) {
-	creds, err := credentials.NewClientTLSFromFile(cfg.Certs, "")
-	if err != nil {
-		return nil, err
-	}
-
-	return grpc.Dial(cfg.ServerAddress, grpc.WithTransportCredentials(creds))
 }
