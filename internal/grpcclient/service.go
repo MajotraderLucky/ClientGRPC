@@ -2,7 +2,9 @@ package grpcclient
 
 import (
 	"clientgrpc/internal/auth"
+	"clientgrpc/internal/config"
 	"context"
+	"log"
 	"time"
 
 	pb "github.com/MajotraderLucky/ServerGRPC/api/proto/pb"
@@ -20,4 +22,28 @@ func MakeEchoRequest(client pb.SimpleServiceClient, message string) (*pb.EchoRes
 	defer reqCancel()
 
 	return client.Echo(reqCtx, &pb.EchoRequest{Message: message})
+}
+
+type GRPCClientService struct {
+	Config *config.Config
+}
+
+func NewGRPCClientService(cfg *config.Config) *GRPCClientService {
+	return &GRPCClientService{Config: cfg}
+}
+
+func (s *GRPCClientService) RunGRPCClient() {
+	conn, err := CreateGRPCConnection(s.Config)
+	if err != nil {
+		log.Fatalf("could not connect to server: %v", err)
+	}
+	defer conn.Close()
+
+	c := pb.NewSimpleServiceClient(conn)
+	response, err := MakeEchoRequest(c, "Hello, server!")
+	if err != nil {
+		log.Fatalf("could not make echo request: %v", err)
+	}
+
+	log.Printf("Greeting: %s", response.GetMessage())
 }
