@@ -21,13 +21,12 @@ func main() {
 	clientService.RunGRPCClient()
 
 	// Загрузка путей из файла
-	err = loadPathsFromFile(cfg.Mailbox_paths_list)
+	err = loadPathsFromFile(cfg.Mailbox_paths_list, cfg)
 	if err != nil {
 		log.Fatalf("Error loading paths from file: %v", err)
 	}
 
 	// Пример использования полученных путей
-	// Проходим по всем путям, которые были загружены из файла
 	for basePath, paths := range pathsMap {
 		fmt.Printf("Base Path: %s\n", basePath)
 		fmt.Println("New Path:", paths[0])  // Путь к новым сообщениям
@@ -36,18 +35,14 @@ func main() {
 }
 
 // Функция для добавления новых путей в карту
-func addPaths(basePath string) {
-	cfg, err := config.LoadConfig("config/config.json")
-	if err != nil {
-		log.Fatalf("Error loading config: %v", err)
-	}
+func addPaths(basePath string, cfg *config.Config) {
 	newPath := basePath + cfg.New_mail_path
 	junkPath := basePath + cfg.Junk_path
 	pathsMap[basePath] = []string{newPath, junkPath}
 }
 
 // Функция для загрузки путей из файла и добавления в карту
-func loadPathsFromFile(filePath string) error {
+func loadPathsFromFile(filePath string, cfg *config.Config) error {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return err
@@ -56,7 +51,7 @@ func loadPathsFromFile(filePath string) error {
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		addPaths(scanner.Text())
+		addPaths(scanner.Text(), cfg)
 	}
 
 	if err := scanner.Err(); err != nil {
