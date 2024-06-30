@@ -6,9 +6,12 @@ import (
 )
 
 type Config struct {
-	ServerAddress  string `json:"serverAddress"`
-	TimeoutSeconds int    `json:"timeoutSeconds"`
-	Certs          string `json:"certsTLS"`
+	ServerAddress      string `json:"serverAddress"`
+	TimeoutSeconds     int    `json:"timeoutSeconds"`
+	Certs              string `json:"certsTLS"`
+	Mailbox_paths_list string `json:"mailbox_paths_list"`
+	New_mail_path      string `json:"new_mail_path"`
+	Junk_path          string `json:"junk_path"`
 }
 
 func LoadConfig(path string) (*Config, error) {
